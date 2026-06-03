@@ -1,0 +1,4 @@
+add_library(engine_driver STATIC engine_driver.c)
+target_include_directories(engine_driver PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(engine_driver PUBLIC zephyr_interface)
+add_dependencies(engine_driver zephyr_generated_headers)
