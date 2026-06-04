@@ -2,6 +2,7 @@
 #include <stm32_ll_gpio.h>
 #include <stm32_ll_tim.h>
 #include <math.h>
+#include <stdio.h>
 
 int engine_driver_init(struct engine_config *engine) {
     int ret;
@@ -34,6 +35,17 @@ int engine_driver_init(struct engine_config *engine) {
     // Convert period in nanoseconds to timer clock cycles
     engine->period_cycles = (uint32_t)((engine->pwm_fwd.period * cycles_per_sec) / NSEC_PER_SEC);
     engine->last_direction = 0;
+
+    // Report configuration and check hardware resolution
+    uint32_t freq_hz = (uint32_t)(NSEC_PER_SEC / engine->pwm_fwd.period);
+    printf("[Engine Driver] Dual PWM initialized at %u Hz.\n", freq_hz);
+    printf("[Engine Driver] Hardware Resolution: %u steps.\n", engine->period_cycles);
+    
+    if (engine->period_cycles < 1024) {
+        printf("[Engine Driver] WARNING: PWM frequency is high or timer clock is low.\n");
+        printf("[Engine Driver]          Resolution is only %u steps (below recommended 1024).\n",
+               engine->period_cycles);
+    }
 
 #ifdef CONFIG_ENGINE_THREAD_SAFE
     k_mutex_init(&engine->mutex);
@@ -83,11 +95,8 @@ void engine_driver_set_speed(struct engine_config *engine, float command) {
         }
     }
 
-    // Map 0.0f to 100.0f duty to 12-bit (0 to 4095)
-    uint32_t duty_12_bit = (uint32_t)((duty_percent * 4095.0f) / 100.0f);
-
-    // Map 12-bit value to timer cycles
-    uint32_t pulse_cycles = (duty_12_bit * engine->period_cycles) / 4095;
+    // Map duty percentage directly to hardware timer clock cycles (Option 1)
+    uint32_t pulse_cycles = (uint32_t)((duty_percent * (float)engine->period_cycles) / 100.0f);
 
     if (direction == 1) {
         // Forward: RPWM (CH1) active, LPWM (CH2) = 0

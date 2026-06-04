@@ -6,6 +6,10 @@ Este módulo fornece um driver estático em C modular e otimizado para o control
 
 O controle é feito em modo **Dual PWM (Slow-Decay / Freio Dinâmico Ativo)**, utilizando as macros Low-Layer (LL) da STMicroelectronics para máxima velocidade de processamento e chaveamento, além de possuir suporte nativo para segurança de concorrência (*thread-safety*).
 
+### Recursos de Performance:
+* **Resolução Dinâmica Nativa:** A entrada de velocidade (de `-100.0f` a `100.0f`) é mapeada diretamente para a contagem de ciclos do timer de hardware, aproveitando a precisão física máxima (sem passos lógicos intermediários limitados a 10 ou 12 bits).
+* **Diagnóstico de Inicialização:** No boot, a função `engine_driver_init` imprime no console a frequência física em Hz e a resolução real em passos. Um aviso de atenção (`WARNING`) será exibido se a resolução for menor do que 1024 passos para garantir o controle ideal.
+
 ---
 
 ## 🔌 Pinagem Sugerida

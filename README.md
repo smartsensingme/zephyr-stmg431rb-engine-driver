@@ -6,6 +6,10 @@ This module provides a modular and optimized static C driver for controlling DC 
 
 Control is performed in **Dual PWM (Slow-Decay / Active Dynamic Braking)** mode, utilizing STMicroelectronics Low-Layer (LL) macros for maximum processing and switching speed, with native support for thread-safety.
 
+### Key Performance Features:
+* **Native Dynamic Resolution:** The speed input (from `-100.0f` to `100.0f`) is mapped directly to the hardware timer's clock cycles, utilizing the maximum physical precision (no intermediate logical steps limited to 10 or 12 bits).
+* **Boot Diagnostics:** During boot, `engine_driver_init` prints the configured physical frequency in Hz and the actual hardware resolution in steps to the console. A warning (`WARNING`) is issued if the resolution drops below 1024 steps to ensure optimal control loop performance.
+
 ---
 
 ## 🔌 Suggested Pinout
